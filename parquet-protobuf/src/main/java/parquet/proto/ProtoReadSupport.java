@@ -69,7 +69,15 @@ public class ProtoReadSupport<T extends Message> extends ReadSupport<T> {
     LOG.debug("Reading data with Protocol Buffer class" + strProtoClass);
 
     MessageType requestedSchema = readContext.getRequestedSchema();
-    Class<? extends Message> protobufClass = Protobufs.getProtobufClass(strProtoClass);
+
+    Class<?> protoClass = null;
+    try {
+      protoClass = configuration.getClassByName(strProtoClass);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("unable to get class: "+strProtoClass);
+    }
+    Class<? extends Message> protobufClass = protoClass.asSubclass(Message.class);
+
     return new ProtoRecordMaterializer(requestedSchema, protobufClass);
   }
 
